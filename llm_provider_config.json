@@ -1,0 +1,54 @@
+{
+    "OPENAI": {
+        "base_url": "https://api.openai.com/v1",
+        "prompter": "openAI",
+        "models": {
+            "gpt-4.5-preview-2025-02-27": {"supports_temperature": true },
+            "chatgpt-4o-latest": {"supports_temperature": true },
+            "o1-2024-12-17": {"supports_temperature": false },
+            "o3-mini": { "supports_temperature": false },
+            "o1-mini": { "supports_temperature": false }
+        }
+    },
+
+    "DEEPSEEK": {
+        "base_url": "https://api.deepseek.com",
+        "prompter": "openAI",
+        "models": {
+            "deepseek-reasoner": {"supports_temperature": true },
+            "deepseek-chat": {"supports_temperature": true }
+        }
+    },
+
+    "GOOGLE": {
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "prompter": "google",
+        "models": {
+            "gemini-1.5-pro-002": {"supports_temperature": true },
+            "gemini-2.0-flash-thinking-exp-01-21": {"supports_temperature": true }
+        }
+    },
+    
+    "ANTHROPIC": {
+      "base_url": "https://api.anthropic.com/v1",
+      "prompter": "anthropic",
+      "models": {
+          "claude-3-7-sonnet-20250219": {"supports_temperature": true }
+      }
+    },
+
+    "HUGGINGFACE": {
+        "prompter": "huggingface",
+        "models": {
+            "google/gemma-3-27b-it": {
+                "supports_temperature": true, 
+                "hf_provider": "nebius"
+            },
+            "Qwen/QwQ-32B": {
+                "supports_temperature": true, 
+                "hf_provider": "nebius"
+            }
+        }
+    }
+
+  }

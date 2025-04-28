@@ -1,7 +1,8 @@
+import argparse
 import os
 import json
+import time
 from Prompter.prompter import Prompter
-from Prompter.mappings import model_converter
 
 # GPT-4.5-Preview, 
 ALL_LLMS = ['Command A (03-2025)', 'Gemini-2.0-Flash-Thinking-Exp-01-21', 'Gemini-1.5-Pro-002', 
@@ -14,33 +15,21 @@ ALL_LLMS = ['Command A (03-2025)', 'Gemini-2.0-Flash-Thinking-Exp-01-21', 'Gemin
 ALL_TEMPERATURES = [0.0, 0.3, 0.7, 1.0]
 
 MODEL_CONVERTER = {
-        "GPT-4.5-Preview": "gpt-4.5-preview-2025-02-27",
-        "ChatGPT-4o-latest (2025-01-29)": "chatgpt-4o-latest",
-        "o1-2024-12-17": "o1-2024-12-17",
-        "o3-mini-high": "o3-mini-high",
-        "o1-mini": "o1-mini",
-        "DeepSeek-R1": "deepseek-reasoner",
-        "DeepSeek-V3": "deepseek-chat",
+    "GPT-4.5-Preview": "gpt-4.5-preview-2025-02-27",
+    "ChatGPT-4o-latest (2025-01-29)": "chatgpt-4o-latest",
+    "o1-2024-12-17": "o1-2024-12-17",
+    "o3-mini-high": "o3-mini",
+    "o1-mini": "o1-mini",
+    "DeepSeek-R1": "deepseek-reasoner",
+    "DeepSeek-V3": "deepseek-chat",
+    "Gemini-1.5-Pro-002" : "gemini-1.5-pro-002",
+    "Gemini-2.0-Flash-Thinking-Exp-01-21": "gemini-2.0-flash-thinking-exp-01-21",
+    "Claude 3.7 Sonnet (thinking-32k)": "claude-3-7-sonnet-20250219",
+    "Gemma-3-27B-it": "google/gemma-3-27b-it",
+    "QwQ-32B": "Qwen/QwQ-32B",
 }
 
-def send_prompt(llm, temperature, format_answer, system_prompt, prompt, role=None, participant=None):
-    params = {
-        "llm": llm,
-        "temperature": temperature,
-        "format_answer": format_answer,
-        "system_prompt": system_prompt,
-        "prompt": prompt,
-        "role": role,
-        "participant": participant
-    }
-
-    # Call the completion function from litellm
-    response = completion(**params)
-    
-    return response
-
-
-def parse_json(input_path, output_path, llms=ALL_LLMS, temperatures=ALL_TEMPERATURES):
+def parse_json(input_path, output_path, selected_llms=ALL_LLMS, selected_temperatures=ALL_TEMPERATURES, delay=None):
     with open(input_path, "r") as file:
         data = json.load(file)
 
@@ -48,16 +37,17 @@ def parse_json(input_path, output_path, llms=ALL_LLMS, temperatures=ALL_TEMPERAT
 
     # Iterate through each LLM in the JSON data
     for llms in data["prompts"]:
-        print(f"LLM: {llms['llm']}")
         llm = llms["llm"]
+        if llm not in selected_llms:
+            print(f"Skipping LLM: {llm}")
+            continue
         for temperatures in llms["prompts"]:
             temperature = temperatures["temperature_level"]
+            if temperature not in selected_temperatures:
+                print(f"Skipping temperature level: {temperature}")
+                continue
             for cq_rep in temperatures["comprehension_questions"]:
                 for cq in cq_rep["prompts"]:
-                    print(f"\t\t\tQuestionID: {cq['id']}")
-                    print(f"\t\t\tQuestion: {cq['prompt_type']}")
-                    print(f"\t\t\tAnswer: {cq['format_answer']}")
-                    print(f"\t\t\tPrompt: {cq['prompt']}")
                     if 'answer' not in cq:
                         cq["answer"] = send_prompt(
                             llm=llm,
@@ -66,16 +56,12 @@ def parse_json(input_path, output_path, llms=ALL_LLMS, temperatures=ALL_TEMPERAT
                             system_prompt=system_prompt,
                             prompt=cq["prompt"],
                         )
-                    print(f"\t\t\tAnswer: {cq['answer']}")
+                        if delay:
+                            time.sleep(int(delay))
 
 
             for task_rep in temperatures["tasks"]:
                 for task in task_rep["prompts"]:
-                    print(f"\t\t\tQuestionID: {task['id']}")
-                    print(f"\t\t\tRole: {task['role']}")
-                    print(f"\t\t\tParticipant: {task['participant']}")
-                    print(f"\t\t\tFormat Answer: {task['format_answer']}")
-                    print(f"\t\t\tPrompt: {task['prompt']}")   
                     if 'answer' not in cq:
                         task["answer"] = send_prompt(
                             llm=llm,
@@ -86,7 +72,8 @@ def parse_json(input_path, output_path, llms=ALL_LLMS, temperatures=ALL_TEMPERAT
                             role=task["role"],
                             participant=task["participant"]
                         )
-                    print(f"\t\t\tAnswer: {task['answer']}")
+                        if delay:
+                            time.sleep(int(delay))
 
 
         ## write the modified data back to the JSON file
@@ -96,26 +83,44 @@ def parse_json(input_path, output_path, llms=ALL_LLMS, temperatures=ALL_TEMPERAT
             json.dump(data, file, indent=4)
 
 if __name__ == "__main__":
-    prompter = Prompter(dotenv_path=".env")
-    provider = model_converter["o3-mini-high"]["provider"]
-    llm = model_converter["o3-mini-high"]["model"]
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("-i", "--input_path", type=str, required=True, help="Path to the input JSON file")
+    # parser.add_argument("-o", "--output_path", type=str, help="Path to the output JSON file")
+    # parser.add_argument("-p", "--provider_config", type=str, help="Path to the provider config file")
+    # parser.add_argument("--llm", type=str, choices=ALL_LLMS, help="LLM to use")
+    # parser.add_argument("--temp", type=float, choices=ALL_TEMPERATURES, help="Temperature to use")
+    # parser.add_argument("--delay", type=str, help="How long to wait in seconds(s) before sending the next prompt")
+    # args = parser.parse_args()
+
+    # if os.path.isfile(args.output_path) == False:
+    #     os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
+    #     print(f"Output path {args.output_path} does not exist. Creating it.")
+
+    # if args.llm:
+    #     selected_llms = [args.llm]
+    # else:
+    #     selected_llms = ALL_LLMS
+
+    # for llm in selected_llms:
+    #     if llm not in MODEL_CONVERTER:
+    #         raise ValueError(f"Unsupported LLM: {llm}")
+    
+    # if args.temp:
+    #     selected_temperatures = [args.temp]
+
+    # parse_json(
+    #     input_path=args.input_path,
+    #     output_path=args.output_path,
+    #     selected_llms=selected_llms,
+    #     selected_temperatures=selected_temperatures,
+    #     delay=args.delay
+    # )
+
+    prompter = Prompter(dotenv_path=".env", provider_metadata_path='./llm_provider_config.json')
+    llm = MODEL_CONVERTER["Gemini-2.0-Flash-Thinking-Exp-01-21"]
+    llm = "Qwen/QwQ-32B"
     temperature = 0.7
-    resp = prompter.send_prompt(provider=provider, llm=llm, temperature=temperature, 
+    resp = prompter.send_prompt(llm=llm, temperature=temperature, 
                                 system_prompt="You are a helpful assistant.", 
                                 prompt="What is the capital of France?")
     print(resp)
-    # Load the JSON file
-    
-
-    # # Initialize a counter for the total number of words
-    # total_word_count = 0
-    # # Iterate through each prompt in the JSON data
-    # for prompt in data["prompts"][0]["prompts"][0]["comprehension_questions"][0]["prompts"]:
-    #     # Count the number of words in the prompt
-    #     total_word_count += len(prompt["prompt"].split())
-    
-    # for prompt in data["prompts"][0]["prompts"][0]["tasks"][0]["prompts"]:
-    #     # Count the number of words in the prompt
-    #     total_word_count += len(prompt["prompt"].split())
-
-    # print(f"Total number of words in the prompts: {total_word_count}")
