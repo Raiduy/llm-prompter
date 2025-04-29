@@ -49,6 +49,13 @@
                 "hf_provider": "nebius"
             }
         }
-    }
+    },
 
-  }
+    "NVIDIA": {
+        "base_url": "https://integrate.api.nvidia.com/v1",
+        "prompter": "openAI",
+        "models": {
+            "nvidia/llama-3.3-nemotron-super-49b-v1": {"supports_temperature": true }
+        }
+    }
+}

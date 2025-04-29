@@ -41,10 +41,10 @@ class Prompter:
 
         if llm not in self.provider_metadata[provider]["models"]:
             raise ValueError(f"Unsupported model: {llm} for provider: {provider}")
-        else:
-            print(f"Using {provider} API, with model: {llm}")
-            response = client.chat.completions.create(**api_call_parameters)
-            return response.choices[0].message.content
+
+        print(f"Using {provider} API, with model: {llm}")
+        response = client.chat.completions.create(**api_call_parameters)
+        return response.choices[0].message.content
 
 
     def prompt_google(self, provider, llm, temperature, system_prompt, prompt) -> str:
@@ -58,7 +58,7 @@ class Prompter:
         response = client.models.generate_content(
             model=llm,
             config=config,
-            contents=system_prompt,
+            contents=prompt,
         )
 
         return response.text
@@ -81,7 +81,7 @@ class Prompter:
             stream=False,
         )
 
-        return message.content
+        return message.content[0].text
 
 
     def prompt_huggingface_provider(self, provider, llm, temperature, system_prompt, prompt) -> str:
@@ -103,14 +103,14 @@ class Prompter:
         provider_name = ''
 
         for provider in self.provider_metadata:
-            print(f"Checking provider: {provider}")
             if llm in self.provider_metadata[provider]["models"]:
                 provider_name = provider
                 print(f"Found model {llm} in provider {provider}")
                 break
             
         if provider_name == '':
-            raise ValueError(f"No providers found for model: {llm}")
+            print(f"No providers found for model: {llm}. Skipping...")
+            return "Model not found in any provider."
 
         if self.provider_metadata[provider_name]["models"][llm]["supports_temperature"] == False:
             if temperature != 0.0:
@@ -120,22 +120,18 @@ class Prompter:
                 print(f"Temperature is not supported for model {llm}. Temperature set to None.")
 
         if self.provider_metadata[provider_name]["prompter"] == "openAI":
-            print(f"Using {provider_name} API")
             answer = self.prompt_openAI(provider_name, llm, temperature, system_prompt, prompt)
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "google":
-            print(f"Using {provider_name} API")
             answer = self.prompt_google(provider_name, llm, temperature, system_prompt, prompt)
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "anthropic":
-            print(f"Using {provider_name} API")
             answer = self.prompt_anthropic(provider_name, llm, temperature, system_prompt, prompt)
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "huggingface":
-            print(f"Using {provider_name} API")
             hf_provider = self.provider_metadata[provider_name]["models"][llm]["hf_provider"]
             answer = self.prompt_huggingface_provider(hf_provider, llm, temperature, system_prompt, prompt)
             return answer
