@@ -40,13 +40,13 @@
     "HUGGINGFACE": {
         "prompter": "huggingface",
         "models": {
-            "google/gemma-3-27b-it": {
-                "supports_temperature": true, 
-                "hf_provider": "nebius"
+            "gemma-3-27b-it": {
+                "supports_temperature": true,
+                "base_url": "https://lykqewrng892z82n.us-east-1.aws.endpoints.huggingface.cloud/v1/"
             },
-            "Qwen/QwQ-32B": {
-                "supports_temperature": true, 
-                "hf_provider": "nebius"
+            "QwQ-32B": {
+                "supports_temperature": true,
+                "base_url": "https://w5hbnbd0uh14b3iv.us-east-1.aws.endpoints.huggingface.cloud/v1/"
             }
         }
     },

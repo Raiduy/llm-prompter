@@ -4,7 +4,7 @@ from dotenv import dotenv_values
 
 import anthropic
 from google import genai
-from huggingface_hub import InferenceClient
+from huggingface_hub import get_inference_endpoint, list_inference_endpoints
 from openai import OpenAI
 
 
@@ -84,19 +84,28 @@ class Prompter:
         return message.content[0].text
 
 
-    def prompt_huggingface_provider(self, provider, llm, temperature, system_prompt, prompt) -> str:
-        client = InferenceClient(provider=provider, api_key=self.api_keys[f"HUGGINGFACE_API_KEY"])
-
-        completion = client.chat.completions.create(
-            model=llm,
-            messages=[
-                { "role": "system", "content": system_prompt },
-                { "role": "user", "content": prompt },
-            ],
-            temperature=temperature,
+    def prompt_huggingface_endpoint(self, provider, llm, temperature, system_prompt, prompt) -> str:
+        client = OpenAI(
+            base_url = self.provider_metadata[provider]["models"][llm]["base_url"],
+            api_key = self.api_keys[f"{provider}_API_KEY"],
         )
 
-        return completion.choices[0].message.content
+        chat_completion = client.chat.completions.create(
+          model="tgi",
+          messages=[
+              {
+                "role": "system",
+                "content": system_prompt
+              },
+              {
+                "role": "user",
+                "content": prompt
+              }
+          ],
+          temperature=temperature,
+        )
+
+        return chat_completion.choices[0].message.content
 
 
     def send_prompt(self, llm, temperature, system_prompt, prompt) -> str:
@@ -132,6 +141,5 @@ class Prompter:
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "huggingface":
-            hf_provider = self.provider_metadata[provider_name]["models"][llm]["hf_provider"]
-            answer = self.prompt_huggingface_provider(hf_provider, llm, temperature, system_prompt, prompt)
+            answer = self.prompt_huggingface_endpoint(provider_name, llm, temperature, system_prompt, prompt)
             return answer

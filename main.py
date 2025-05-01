@@ -25,8 +25,8 @@ MODEL_CONVERTER = {
     "Gemini-1.5-Pro-002" : "gemini-1.5-pro-002",
     "Gemini-2.0-Flash-Thinking-Exp-01-21": "gemini-2.0-flash-thinking-exp-01-21",
     "Claude 3.7 Sonnet (thinking-32k)": "claude-3-7-sonnet-20250219",
-    "Gemma-3-27B-it": "google/gemma-3-27b-it",
-    "QwQ-32B": "Qwen/QwQ-32B",
+    "Gemma-3-27B-it": "gemma-3-27b-it",
+    "QwQ-32B": "QwQ-32B",
 }
 
 
@@ -135,9 +135,9 @@ if __name__ == "__main__":
     parse_json(prompter, args.input_path, args.output_path, selected_llms=selected_llms, 
                selected_temperatures=selected_temperatures, delay=args.delay)
     
-    # llm = MODEL_CONVERTER["Gemini-2.0-Flash-Thinking-Exp-01-21"]
-    # llm = "Qwen/QwQ-32B"
-    # temperature = 0.7
+    # llm = MODEL_CONVERTER["Gemma-3-27B-it"]
+    # # llm = "Qwen/QwQ-32B"
+    # temperature = 0.0
     # resp = prompter.send_prompt(llm=llm, temperature=temperature, 
     #                             system_prompt="You are a helpful assistant.", 
     #                             prompt="What is the capital of France?")
