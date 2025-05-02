@@ -27,7 +27,11 @@ MODEL_CONVERTER = {
     "Claude 3.7 Sonnet (thinking-32k)": "claude-3-7-sonnet-20250219",
     "Gemma-3-27B-it": "gemma-3-27b-it",
     "QwQ-32B": "QwQ-32B",
-    "Llama-3.3-Nemotron-Super-49B-v1": "nvidia/llama-3.3-nemotron-super-49b-v1"
+    "Llama-3.3-Nemotron-Super-49B-v1": "nvidia/llama-3.3-nemotron-super-49b-v1",
+    "Qwen2.5-Max": "qwen-max-0125",
+    "Qwen-Plus-0125": "qwen-plus-0125",
+    "Mistral-Large-2407": "mistral-large-2407",
+    "Command A (03-2025)": "command-a-03-2025",
 }
 
 
@@ -136,10 +140,10 @@ if __name__ == "__main__":
     parse_json(prompter, args.input_path, args.output_path, selected_llms=selected_llms, 
                selected_temperatures=selected_temperatures, delay=args.delay)
     
-    # llm = MODEL_CONVERTER["Gemma-3-27B-it"]
+    # llm = MODEL_CONVERTER["Command A (03-2025)"]
     # # llm = "Qwen/QwQ-32B"
     # temperature = 0.0
     # resp = prompter.send_prompt(llm=llm, temperature=temperature, 
     #                             system_prompt="You are a helpful assistant.", 
-    #                             prompt="What is the capital of France?")
+    #                             prompt="What was my last question?")
     # print(resp)

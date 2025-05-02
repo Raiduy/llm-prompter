@@ -5,6 +5,7 @@ from dotenv import dotenv_values
 import anthropic
 from google import genai
 from huggingface_hub import get_inference_endpoint, list_inference_endpoints
+from mistralai import Mistral
 from openai import OpenAI
 
 
@@ -108,6 +109,26 @@ class Prompter:
         return chat_completion.choices[0].message.content
 
 
+    def prompt_mistral(self, provider, llm, temperature, system_prompt, prompt) -> str:
+        client = Mistral(api_key=self.api_keys[f"{provider}_API_KEY"])
+
+        response = client.chat.complete(
+            model=llm,
+            messages=[
+                {
+                    "role": "system",
+                    "content": system_prompt,
+                },
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ],
+            temperature=temperature,
+        )
+        
+        return response.choices[0].message.content
+
     def send_prompt(self, llm, temperature, system_prompt, prompt) -> str:
         provider_name = ''
 
@@ -142,4 +163,8 @@ class Prompter:
 
         elif self.provider_metadata[provider_name]["prompter"] == "huggingface":
             answer = self.prompt_huggingface_endpoint(provider_name, llm, temperature, system_prompt, prompt)
+            return answer
+
+        elif self.provider_metadata[provider_name]["prompter"] == "mistral":
+            answer = self.prompt_mistral(provider_name, llm, temperature, system_prompt, prompt)
             return answer
