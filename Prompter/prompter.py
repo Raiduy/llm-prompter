@@ -37,6 +37,13 @@ class Prompter:
             "stream": False,
         }
 
+        if llm == 'o1-mini':
+            api_call_parameters["messages"] = [
+                {"role": "user", "content": system_prompt + \
+                                            '\n\n### Instruction:' + prompt + \
+                                            '\n\n### Response:'},
+            ]
+
         if temperature is not None:
             api_call_parameters["temperature"] = temperature
 

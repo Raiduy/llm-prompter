@@ -32,6 +32,7 @@ MODEL_CONVERTER = {
     "Qwen-Plus-0125": "qwen-plus-0125",
     "Mistral-Large-2407": "mistral-large-2407",
     "Command A (03-2025)": "command-a-03-2025",
+    "Athene-v2-Chat-72B": "Athene-v2-Chat-72B",
 }
 
 
@@ -78,7 +79,8 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
                             cq["answer"] = answer
                             print(f"Answer for comprehension prompt {i}/{total_prompts}: {answer}")
                             write_json(cq_rep, f'./checkpoints/{llm}_temp_{temperature}_rep_{cq_rep["repetition_id"]}_cq.json')
-                            if delay:
+                            write_json(data, output_path)  # Save the modified data to the output path
+                            if delay and answer != f"Temperature is not supported for model {MODEL_CONVERTER[llm]}":
                                 print(f"Waiting for {delay} seconds before sending the next prompt...")
                                 time.sleep(int(delay))
 
@@ -99,6 +101,7 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
                             task["answer"] = answer
                             print(f"Answer for task prompt {i}/{total_prompts}: {answer}")
                             write_json(task_rep, f'./checkpoints/{llm}_temp_{temperature}_rep_{task_rep["repetition_id"]}_task.json')
+                            write_json(data, output_path)  # Save the modified data to the output path
                             if delay:
                                 print(f"Waiting for {delay} seconds before sending the next prompt...")
                                 time.sleep(int(delay))
@@ -134,7 +137,9 @@ if __name__ == "__main__":
         
     for llm in selected_llms:
         if llm not in MODEL_CONVERTER:
-            raise ValueError(f"Unsupported LLM: {llm}")
+            print(f"Unsupported LLM: {llm}, skipping...")
+            selected_llms.remove(llm)
+            continue
 
     prompter = Prompter(dotenv_path=".env", provider_metadata_path='./llm_provider_config.json')
     parse_json(prompter, args.input_path, args.output_path, selected_llms=selected_llms, 
