@@ -27,6 +27,7 @@ MODEL_CONVERTER = {
     "Claude 3.7 Sonnet (thinking-32k)": "claude-3-7-sonnet-20250219",
     "Gemma-3-27B-it": "gemma-3-27b-it",
     "QwQ-32B": "QwQ-32B",
+    "Llama-3.3-Nemotron-Super-49B-v1": "nvidia/llama-3.3-nemotron-super-49b-v1"
 }
 
 
