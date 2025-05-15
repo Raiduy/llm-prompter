@@ -147,14 +147,14 @@ class Prompter:
             
         if provider_name == '':
             print(f"No providers found for model: {llm}. Skipping...")
-            return "Model not found in any provider."
+            return None
 
         if self.provider_metadata[provider_name]["models"][llm]["supports_temperature"] == False:
             if temperature != 0.0:
-                return f"Temperature is not supported for model {llm}"
+                return "Temperature not supported"
             if temperature == 0.0:
                 temperature = None
-                print(f"Temperature is not supported for model {llm}. Temperature set to None.")
+                print(f"Temperature is not supported for model {llm}. Using default Temperature.")
 
         if self.provider_metadata[provider_name]["prompter"] == "openAI":
             answer = self.prompt_openAI(provider_name, llm, temperature, system_prompt, prompt)

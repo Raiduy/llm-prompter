@@ -72,7 +72,7 @@
         }, 
         "deepseek-v2.5-1210": {
           "supports_temperature": true,
-          "base_url": "https://api.deepseek.com/v1/"
+          "base_url": "https://x9qcy2zdbofnmbda.us-east-2.aws.endpoints.huggingface.cloud/v1/"
         }
       }
     },

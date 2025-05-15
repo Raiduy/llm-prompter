@@ -25,15 +25,15 @@ MODEL_CONVERTER = {
     "Gemini-1.5-Pro-002" : "gemini-1.5-pro-002",
     "Gemini-2.0-Flash-Thinking-Exp-01-21": "gemini-2.0-flash-thinking-exp-01-21",
     "Claude 3.7 Sonnet (thinking-32k)": "claude-3-7-sonnet-20250219",
-    "Gemma-3-27B-it": "gemma-3-27b-it",
-    "QwQ-32B": "QwQ-32B",
+    # "Gemma-3-27B-it": "gemma-3-27b-it",
+    # "QwQ-32B": "QwQ-32B",
     "Llama-3.3-Nemotron-Super-49B-v1": "nvidia/llama-3.3-nemotron-super-49b-v1",
     "Qwen2.5-Max": "qwen-max-0125",
     "Qwen-Plus-0125": "qwen-plus-0125",
     "Mistral-Large-2407": "mistral-large-2407",
     "Command A (03-2025)": "command-a-03-2025",
-    "Athene-v2-Chat-72B": "Athene-v2-Chat-72B",
-    "Deepseek-v2.5-1210": "deepseek-v2.5-1210",
+    # "Athene-v2-Chat-72B": "Athene-v2-Chat-72B",
+    # "Deepseek-v2.5-1210": "deepseek-v2.5-1210",
     "Meta-Llama-3.1-405B-Instruct-bf16": "meta-llama/Meta-Llama-3.1-405B-Instruct",
 }
 
@@ -58,17 +58,28 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
         if llm not in selected_llms:
             print(f"Skipping LLM: {llm}")
             continue
+        
+        TEMP_FLAG = "custom"
+        if "using_default_temperature" in llms:
+            TEMP_FLAG = "default"
 
         for temperatures in llms["prompts"]:
             temperature = temperatures["temperature_level"]
+
+            if TEMP_FLAG == "default" and temperature != 0.0:
+                print(f"Model does not support temperatures")
+                continue
+
             if temperature not in selected_temperatures:
                 print(f"Skipping temperature level: {temperature}")
                 continue
+            
+
             for cq_rep in temperatures["comprehension_questions"]:
                 for i, cq in enumerate(cq_rep["prompts"]):
                     total_prompts = len(cq_rep['prompts'])
                     if 'answer' in cq:
-                        print(f"Answer already exists for comprehension prompt {i}/{total_prompts}")
+                        print(f"Answer already exists for comprehension prompt {i+1}/{total_prompts}")
                         continue
                     else:
                         answer = prompter.send_prompt(
@@ -77,12 +88,12 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
                             system_prompt=system_prompt,
                             prompt=cq["prompt"],
                         )
-                        if answer != "Model not found in any provider.":
+                        if answer != None:
                             cq["answer"] = answer
                             print(f"Answer for comprehension prompt {i}/{total_prompts}: {answer}")
                             write_json(cq_rep, f'./checkpoints/{llm}_temp_{temperature}_rep_{cq_rep["repetition_id"]}_cq.json')
                             write_json(data, output_path)  # Save the modified data to the output path
-                            if delay and answer != f"Temperature is not supported for model {MODEL_CONVERTER[llm]}":
+                            if delay:
                                 print(f"Waiting for {delay} seconds before sending the next prompt...")
                                 time.sleep(int(delay))
 
