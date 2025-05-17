@@ -55,7 +55,7 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
     # Iterate through each LLM in the JSON data
     for llms in data["prompts"]:
         llm = llms["llm"]
-        if llm not in selected_llms:
+        if llm not in selected_llms or llm not in MODEL_CONVERTER:
             print(f"Skipping LLM: {llm}")
             continue
         
@@ -90,7 +90,7 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
                         )
                         if answer != None:
                             cq["answer"] = answer
-                            print(f"Answer for comprehension prompt {i}/{total_prompts}: {answer}")
+                            print(f"Answer given for {llm}, {temperature}, {cq['id']} for comprehension prompt {i+1}/{total_prompts}")
                             write_json(cq_rep, f'./checkpoints/{llm}_temp_{temperature}_rep_{cq_rep["repetition_id"]}_cq.json')
                             write_json(data, output_path)  # Save the modified data to the output path
                             if delay:
@@ -101,7 +101,7 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
                 for i, task in enumerate(task_rep["prompts"]):
                     total_prompts = len(task_rep['prompts'])
                     if 'answer' in task:
-                        print(f"Answer already exists for task prompt {i}/{total_prompts}")
+                        print(f"Answer already exists for task prompt {i+1}/{total_prompts}")
                         continue
                     else:
                         answer = prompter.send_prompt(
@@ -112,14 +112,14 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
                         )
                         if answer != "Model not found in any provider.":
                             task["answer"] = answer
-                            print(f"Answer for task prompt {i}/{total_prompts}: {answer}")
+                            print(f"Answer given for {llm}, {temperature}, {task['id']} for task prompt {i+1}/{total_prompts}")
                             write_json(task_rep, f'./checkpoints/{llm}_temp_{temperature}_rep_{task_rep["repetition_id"]}_task.json')
                             write_json(data, output_path)  # Save the modified data to the output path
                             if delay:
                                 print(f"Waiting for {delay} seconds before sending the next prompt...")
                                 time.sleep(int(delay))
     
-    write_json(data, output_path)  # Save the modified data to the output path
+    # write_json(data, output_path)  # Save the modified data to the output path
 
         
 if __name__ == "__main__":
