@@ -60,11 +60,11 @@
       "models": {
         "gemma-3-27b-it": {
           "supports_temperature": true,
-          "base_url": "https://lykqewrng892z82n.us-east-1.aws.endpoints.huggingface.cloud/v1/"
+          "base_url": "https://pssr3t080524swq5.us-east-1.aws.endpoints.huggingface.cloud/v1/"
         },
         "QwQ-32B": {
           "supports_temperature": true,
-          "base_url": "https://w5hbnbd0uh14b3iv.us-east-1.aws.endpoints.huggingface.cloud/v1/"
+          "base_url": "https://i6y4haam8b2fa2gs.us-east-1.aws.endpoints.huggingface.cloud/v1/"
         },
         "Athene-v2-Chat-72B": {
           "supports_temperature": true,

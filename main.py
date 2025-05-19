@@ -25,8 +25,8 @@ MODEL_CONVERTER = {
     "Gemini-1.5-Pro-002" : "gemini-1.5-pro-002",
     "Gemini-2.0-Flash-Thinking-Exp-01-21": "gemini-2.0-flash-thinking-exp-01-21",
     "Claude 3.7 Sonnet (thinking-32k)": "claude-3-7-sonnet-20250219",
-    # "Gemma-3-27B-it": "gemma-3-27b-it",
-    # "QwQ-32B": "QwQ-32B",
+    "Gemma-3-27B-it": "gemma-3-27b-it",
+    "QwQ-32B": "QwQ-32B",
     "Llama-3.3-Nemotron-Super-49B-v1": "nvidia/llama-3.3-nemotron-super-49b-v1",
     "Qwen2.5-Max": "qwen-max-0125",
     "Qwen-Plus-0125": "qwen-plus-0125",
@@ -79,7 +79,7 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
                 for i, cq in enumerate(cq_rep["prompts"]):
                     total_prompts = len(cq_rep['prompts'])
                     if 'answer' in cq:
-                        print(f"Answer already exists for comprehension prompt {i+1}/{total_prompts}")
+                        print(f"Answer already exists for {llm}, {temperature}, {cq['id']}, rep {cq_rep["repetition_id"]} for comprehension prompt {i+1}/{total_prompts}")
                         continue
                     else:
                         answer = prompter.send_prompt(
@@ -90,7 +90,7 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
                         )
                         if answer != None:
                             cq["answer"] = answer
-                            print(f"Answer given for {llm}, {temperature}, {cq['id']} for comprehension prompt {i+1}/{total_prompts}")
+                            print(f"Answer given for {llm}, {temperature}, {cq['id']}, rep {cq_rep["repetition_id"]} for comprehension prompt {i+1}/{total_prompts}")
                             write_json(cq_rep, f'./checkpoints/{llm}_temp_{temperature}_rep_{cq_rep["repetition_id"]}_cq.json')
                             write_json(data, output_path)  # Save the modified data to the output path
                             if delay:
@@ -101,7 +101,7 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
                 for i, task in enumerate(task_rep["prompts"]):
                     total_prompts = len(task_rep['prompts'])
                     if 'answer' in task:
-                        print(f"Answer already exists for task prompt {i+1}/{total_prompts}")
+                        print(f"Answer already exists for {llm}, {temperature}, {task['id']}, rep {task_rep['repetition_id']} for task prompt {i+1}/{total_prompts}")
                         continue
                     else:
                         answer = prompter.send_prompt(
@@ -112,7 +112,7 @@ def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, select
                         )
                         if answer != "Model not found in any provider.":
                             task["answer"] = answer
-                            print(f"Answer given for {llm}, {temperature}, {task['id']} for task prompt {i+1}/{total_prompts}")
+                            print(f"Answer given for {llm}, {temperature}, {task['id']}, rep {task_rep['repetition_id']} for task prompt {i+1}/{total_prompts}")
                             write_json(task_rep, f'./checkpoints/{llm}_temp_{temperature}_rep_{task_rep["repetition_id"]}_task.json')
                             write_json(data, output_path)  # Save the modified data to the output path
                             if delay:
