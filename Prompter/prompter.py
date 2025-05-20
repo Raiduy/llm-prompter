@@ -1,9 +1,10 @@
 import os
 import json
+import requests
 from dotenv import dotenv_values
 
 import anthropic
-from google import genai
+import google.generativeai as genai
 from huggingface_hub import get_inference_endpoint, list_inference_endpoints
 from mistralai import Mistral
 from openai import OpenAI
@@ -136,6 +137,33 @@ class Prompter:
         
         return response.choices[0].message.content
 
+    def prompt_nebula(self, provider, llm, temperature, system_prompt, prompt) -> str:
+        url = self.provider_metadata[provider]["base_url"]
+        headers = {
+            'Authorization': f'Bearer {self.api_keys[f"{provider}_API_KEY"]}',
+            'Content-Type': 'application/json'
+        }
+        data = {
+            "model": llm,
+            "params": {
+                "temperature": temperature,
+                "num_ctx": 4096
+            },
+            "messages": [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        }
+        response = requests.post(url, headers=headers, json=data)
+        return response.json()['choices'][0]['message']['content']
+
+
     def send_prompt(self, llm, temperature, system_prompt, prompt) -> str:
         provider_name = ''
 
@@ -174,4 +202,8 @@ class Prompter:
 
         elif self.provider_metadata[provider_name]["prompter"] == "mistral":
             answer = self.prompt_mistral(provider_name, llm, temperature, system_prompt, prompt)
+            return answer
+
+        elif self.provider_metadata[provider_name]["prompter"] == "nebula":
+            answer = self.prompt_nebula(provider_name, llm, temperature, system_prompt, prompt)
             return answer
