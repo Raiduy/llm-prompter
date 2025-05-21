@@ -43,7 +43,7 @@ def write_json(data, output_path):
         json.dump(data, file, indent=4)
 
 
-def parse_json(prompter, input_path, output_path, selected_llms=ALL_LLMS, selected_temperatures=ALL_TEMPERATURES, delay=None):
+def parse_json(prompter, input_path, output_path=None, selected_llms=ALL_LLMS, selected_temperatures=ALL_TEMPERATURES, delay=None):
     with open(input_path, "r") as file:
         data = json.load(file)
 
