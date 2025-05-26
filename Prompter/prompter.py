@@ -4,7 +4,7 @@ import requests
 from dotenv import dotenv_values
 
 import anthropic
-import google.generativeai as genai
+from google import genai
 from huggingface_hub import get_inference_endpoint, list_inference_endpoints
 from mistralai import Mistral
 from openai import OpenAI
