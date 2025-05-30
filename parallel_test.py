@@ -27,7 +27,7 @@ MODEL_CONVERTER = {
     "Qwen-Plus-0125": "qwen-plus-0125",
     "Mistral-Large-2407": "mistral-large-2407",
     "Command A (03-2025)": "command-a-03-2025",
-    # "Athene-v2-Chat-72B": "Athene-v2-Chat-72B",
+    "Athene-v2-Chat-72B": "Athene-v2-Chat-72B",
     "Deepseek-v2.5-1210": "deepseek-v2.5:latest",
     "Meta-Llama-3.1-405B-Instruct-bf16": "meta-llama/Meta-Llama-3.1-405B-Instruct",
 }

@@ -77,8 +77,8 @@
       }
     },
 
-    "NEBIUS": {
-        "base_url": "https://api.studio.nebius.com/v1/",
+    "NEBIUS_HF": {
+        "base_url": "https://router.huggingface.co/nebius/v1",
         "prompter": "openAI",
         "models": {
             "meta-llama/Meta-Llama-3.1-405B-Instruct": {"supports_temperature": true }
