@@ -62,23 +62,19 @@
           "supports_temperature": true,
           "base_url": "https://pssr3t080524swq5.us-east-1.aws.endpoints.huggingface.cloud/v1/"
         },
-        "QwQ-32B": {
+        "Athene-70B": {
           "supports_temperature": true,
-          "base_url": "https://i6y4haam8b2fa2gs.us-east-1.aws.endpoints.huggingface.cloud/v1/"
+          "base_url": "https://bxwslsgwe2yqlnru.us-east-2.aws.endpoints.huggingface.cloud/v1/"
         },
         "Athene-v2-Chat-72B": {
           "supports_temperature": true,
           "base_url": "https://snibkn9fpuhrhzko.us-east-2.aws.endpoints.huggingface.cloud/v1/"
-        }, 
-        "deepseek-v2.5-1210": {
-          "supports_temperature": true,
-          "base_url": "https://x9qcy2zdbofnmbda.us-east-2.aws.endpoints.huggingface.cloud/v1/"
         }
       }
     },
 
-    "NEBIUS_HF": {
-        "base_url": "https://router.huggingface.co/nebius/v1",
+    "NEBIUS": {
+        "base_url": "https://api.studio.nebius.com/v1/",
         "prompter": "openAI",
         "models": {
             "meta-llama/Meta-Llama-3.1-405B-Instruct": {"supports_temperature": true }

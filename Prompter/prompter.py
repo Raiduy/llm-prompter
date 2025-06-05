@@ -52,7 +52,12 @@ class Prompter:
             raise ValueError(f"Unsupported model: {llm} for provider: {provider}")
 
         print(f"Using {provider} API, with model: {llm}")
-        response = client.chat.completions.create(**api_call_parameters)
+        try:
+            response = client.chat.completions.create(**api_call_parameters)
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+
         return response.choices[0].message.content
 
 

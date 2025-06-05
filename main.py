@@ -158,7 +158,7 @@ if __name__ == "__main__":
     # parse_json(prompter, args.input_path, args.output_path, selected_llms=selected_llms, 
     #            selected_temperatures=selected_temperatures, delay=args.delay)
     
-    llm = MODEL_CONVERTER["Gemini-2.0-Flash-Thinking-Exp-01-21"]
+    llm = MODEL_CONVERTER["Meta-Llama-3.1-405B-Instruct-bf16"]
     # llm = "Qwen/QwQ-32B"
     temperature = 0.0
     resp = prompter.send_prompt(llm=llm, temperature=temperature, 

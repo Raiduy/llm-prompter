@@ -2,8 +2,8 @@ import json
 import os
 import re
 
-CHECKPOINT_DIR = './pll_checkpoints'
-OUT_FILE = 'prompts_plan_FULL_1_REP_OUTPUT_LIMIT_res.json'
+CHECKPOINT_DIR = './checkpoints'
+OUT_FILE = 'prompts_plan_FULL_1_REP_OUTPUT_LIMIT_ATHENE_70B_res.json'
 
 
 def load_json_data(json_path):
@@ -28,7 +28,7 @@ def parse_checkpoint_file(filename):
 
 
 if __name__=='__main__':
-    with open('./prompts_plan_FULL_1_REP_OUTPUT_LIMIT.json', 'r') as f:
+    with open('./prompts_plan_FULL_1_REP_OUTPUT_LIMIT_ATHENE_70B.json', 'r') as f:
         data = json.load(f)
 
     cp_files = os.listdir(CHECKPOINT_DIR)

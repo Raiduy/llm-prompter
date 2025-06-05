@@ -1,4 +1,5 @@
 from multiprocessing import Pool, current_process, cpu_count
+from signal import signal, SIGINT
 from Prompter.prompter import Prompter
 
 import argparse
@@ -7,7 +8,7 @@ import os
 import time
 
 # CONSTANTS
-CHECKPOINT_FOLDER = './pll_checkpoints'
+CHECKPOINT_FOLDER = './checkpoints'
 ALL_TEMPERATURES = [0.0, 0.3, 0.7, 1.0]
 MODEL_CONVERTER = {
     "GPT-4.5-Preview": "gpt-4.5-preview-2025-02-27",
@@ -21,13 +22,13 @@ MODEL_CONVERTER = {
     "Gemini-2.0-Flash-Thinking-Exp-01-21": "gemini-2.0-flash-thinking-exp-01-21",
     "Claude 3.7 Sonnet (thinking-32k)": "claude-3-7-sonnet-20250219",
     "Gemma-3-27B-it": "gemma-3-27b-it",
-    "QwQ-32B": "QwQ-32B",
     "Llama-3.3-Nemotron-Super-49B-v1": "nvidia/llama-3.3-nemotron-super-49b-v1",
     "Qwen2.5-Max": "qwen-max-0125",
     "Qwen-Plus-0125": "qwen-plus-0125",
     "Mistral-Large-2407": "mistral-large-2407",
     "Command A (03-2025)": "command-a-03-2025",
     "Athene-v2-Chat-72B": "Athene-v2-Chat-72B",
+    "Athene-70B": "Athene-70B",
     "Deepseek-v2.5-1210": "deepseek-v2.5:latest",
     "Meta-Llama-3.1-405B-Instruct-bf16": "meta-llama/Meta-Llama-3.1-405B-Instruct",
 }
@@ -151,6 +152,10 @@ def generate_parallelizable_datastructure(input_path, provider_config, delay, se
     parallelized_data = tuple(to_parallelize)
     return parallelized_data, sys_prompt
 
+# enable ctrl+c to interrupt the program and child processes
+# source: https://stackoverflow.com/questions/76709695/how-to-stop-multiprocessing-pool-with-ctrlc-python-3-10
+def initializer():
+    signal(SIGINT, lambda: None)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -168,7 +173,7 @@ if __name__ == "__main__":
     if num_cpus > len(llms):
         num_cpus = len(llms)
 
-    with Pool(processes=num_cpus) as pool:
+    with Pool(processes=num_cpus, initializer=initializer) as pool:
         results = pool.map(process_content, parallelized_data)
     
     output_dict = {
