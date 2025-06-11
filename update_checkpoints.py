@@ -33,7 +33,7 @@ if __name__=='__main__':
     args = parser.parse_args()
 
     IN_FILE = args.input_path
-    CHECKPOINT_DIR = args.checkpoints_path
+    CHECKPOINT_DIR = args.checkpoints_folder
     OUT_FILE = args.output_path
 
     data = load_json_data(IN_FILE)
