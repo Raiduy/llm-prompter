@@ -1,0 +1,6 @@
+anthropic
+huggingface_hub
+mistralai
+openai
+python-dotenv
+Requests

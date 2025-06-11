@@ -173,6 +173,8 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+# Checkpoints Folder
 checkpoints
-pll_checkpoints
-prompts*.json
+
+# Results Folder
+results
