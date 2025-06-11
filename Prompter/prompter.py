@@ -69,11 +69,15 @@ class Prompter:
             temperature=temperature,
         )
         
-        response = client.models.generate_content(
-            model=llm,
-            config=config,
-            contents=prompt,
-        )
+        try:
+            response = client.models.generate_content(
+                model=llm,
+                config=config,
+                contents=prompt,
+            )
+        except Exception as e:
+            print(f"Google Prompter Error: {e}")
+            return None
 
         return response.text
 
@@ -194,7 +198,11 @@ class Prompter:
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "google":
-            answer = self.prompt_google(provider_name, llm, temperature, system_prompt, prompt)
+            answer = None
+            retry_limit = 5
+            while answer==None or retry_limit > 0:
+                answer = self.prompt_google(provider_name, llm, temperature, system_prompt, prompt)
+                retry_limit -= 1
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "anthropic":
