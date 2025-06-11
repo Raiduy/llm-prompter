@@ -175,3 +175,4 @@ cython_debug/
 
 checkpoints
 pll_checkpoints
+prompts*.json
