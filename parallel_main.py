@@ -8,7 +8,8 @@ import os
 import time
 
 # CONSTANTS
-CHECKPOINT_FOLDER = './checkpoints'
+CHECKPOINT_FOLDER = './logger_checkpoints'
+LOGS_FOLDER = './logs'
 ALL_TEMPERATURES = [0.0, 0.3, 0.7, 1.0]
 MODEL_CONVERTER = {
     "GPT-4.5-Preview": "gpt-4.5-preview-2025-02-27",
@@ -38,6 +39,7 @@ def write_json(data, output_path):
     with open(output_path, "w") as file:
         json.dump(data, file, indent=4)
 
+
 def remove_smaller_checkpoints(llm):
     print(f'Removing small checkpoints for {llm}')
     for file in os.listdir(CHECKPOINT_FOLDER):
@@ -52,6 +54,7 @@ def process_prompts(prompter, system_prompt, llm, temperature, prompt_repetition
         if 'answer' not in prompt:
             # answer = 'Test'
             answer = prompter.send_prompt(
+                id=prompt["id"],
                 llm=MODEL_CONVERTER[llm],
                 temperature=temperature,
                 system_prompt=system_prompt,
@@ -152,6 +155,7 @@ def generate_parallelizable_datastructure(input_path, provider_config, delay, se
     parallelized_data = tuple(to_parallelize)
     return parallelized_data, sys_prompt
 
+
 # enable ctrl+c to interrupt the program and child processes
 # source: https://stackoverflow.com/questions/76709695/how-to-stop-multiprocessing-pool-with-ctrlc-python-3-10
 def initializer():
@@ -159,11 +163,11 @@ def initializer():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input_path", type=str, required=True, help="Path to the input JSON file")
-    parser.add_argument("-o", "--output_path", type=str, help="Path to the output JSON file")
-    parser.add_argument("-p", "--provider_config", type=str, help="Path to the provider config file")
-    parser.add_argument("--llm", type=str, choices=list(MODEL_CONVERTER.keys()), help="LLM to use")
-    parser.add_argument("--delay", type=str, help="How long to wait in seconds(s) before sending the next prompt")
+    parser.add_argument("-i", "--input_path", type=str, required=True, help="Path to the input JSON file.")
+    parser.add_argument("-o", "--output_path", type=str, help="Path to the output JSON file.")
+    parser.add_argument("-p", "--provider_config", type=str, help="Path to the provider config file.")
+    parser.add_argument("--llm", type=str, choices=list(MODEL_CONVERTER.keys()), help="Select only one LLM to use.")
+    parser.add_argument("--delay", type=str, help="How long to wait in seconds(s) before sending the next prompt.")
     args = parser.parse_args()
 
     llms = process_arguments(args)

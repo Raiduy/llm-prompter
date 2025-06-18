@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+import time
 from dotenv import dotenv_values
 
 import anthropic
@@ -13,8 +14,9 @@ from openai import OpenAI
 # Load environment variables from .env file
 
 class Prompter:
-    def __init__(self, dotenv_path, provider_metadata_path):
+    def __init__(self, dotenv_path, provider_metadata_path, log_folder='./logs'):
         self.api_keys = dotenv_values(dotenv_path)
+        self.log_folder = log_folder
         
         try:
             with open(provider_metadata_path, "r") as file:
@@ -24,8 +26,11 @@ class Prompter:
         except json.JSONDecodeError:
             raise ValueError(f"Error decoding JSON from provider metadata file: {provider_metadata_path}")
 
+    def write_log(self, id, data):
+        with open(f'{self.log_folder}/{str(id)}.log', 'w') as file:
+            file.write(data)
 
-    def prompt_openAI(self, provider, llm, temperature, system_prompt, prompt) -> str:
+    def prompt_openAI(self, id, provider, llm, temperature, system_prompt, prompt) -> str:
         client = OpenAI(api_key=self.api_keys[f"{provider}_API_KEY"],
                         base_url=self.provider_metadata[provider]["base_url"])
 
@@ -58,10 +63,13 @@ class Prompter:
             print(f"Error: {e}")
             return None
 
+        if id:
+            self.write_log(id, response)
+
         return response.choices[0].message.content
 
 
-    def prompt_google(self, provider, llm, temperature, system_prompt, prompt) -> str:
+    def prompt_google(self, id, provider, llm, temperature, system_prompt, prompt) -> str:
         client = genai.Client(api_key=self.api_keys[f"{provider}_API_KEY"])
         
         config = genai.types.GenerateContentConfig(
@@ -78,14 +86,16 @@ class Prompter:
         except Exception as e:
             print(f"Google Prompter Error: {e}")
             return None
-
+        
+        if id:
+            self.write_log(id, response)
         return response.text
 
 
-    def prompt_anthropic(self, provider, llm, temperature, system_prompt, prompt) -> str:
+    def prompt_anthropic(self, id, provider, llm, temperature, system_prompt, prompt) -> str:
         client = anthropic.Anthropic(api_key=self.api_keys[f"{provider}_API_KEY"])
 
-        message = client.messages.create(
+        response = client.messages.create(
             model=llm,
             max_tokens=1000,
             system=system_prompt,
@@ -99,16 +109,18 @@ class Prompter:
             stream=False,
         )
 
-        return message.content[0].text
+        if id:
+            self.write_log(id, response)
+        return response.content[0].text
 
 
-    def prompt_huggingface_endpoint(self, provider, llm, temperature, system_prompt, prompt) -> str:
+    def prompt_huggingface_endpoint(self, id, provider, llm, temperature, system_prompt, prompt) -> str:
         client = OpenAI(
             base_url = self.provider_metadata[provider]["models"][llm]["base_url"],
             api_key = self.api_keys[f"{provider}_API_KEY"],
         )
 
-        chat_completion = client.chat.completions.create(
+        response = client.chat.completions.create(
           model="tgi",
           messages=[
               {
@@ -123,10 +135,12 @@ class Prompter:
           temperature=temperature,
         )
 
-        return chat_completion.choices[0].message.content
+        if id:
+            self.write_log(id, response)
+        return response.choices[0].message.content
 
 
-    def prompt_mistral(self, provider, llm, temperature, system_prompt, prompt) -> str:
+    def prompt_mistral(self, id, provider, llm, temperature, system_prompt, prompt) -> str:
         client = Mistral(api_key=self.api_keys[f"{provider}_API_KEY"])
 
         response = client.chat.complete(
@@ -143,10 +157,12 @@ class Prompter:
             ],
             temperature=temperature,
         )
-        
+ 
+        if id:
+            self.write_log(id, response)
         return response.choices[0].message.content
 
-    def prompt_nebula(self, provider, llm, temperature, system_prompt, prompt) -> str:
+    def prompt_nebula(self, id, provider, llm, temperature, system_prompt, prompt) -> str:
         url = self.provider_metadata[provider]["base_url"]
         headers = {
             'Authorization': f'Bearer {self.api_keys[f"{provider}_API_KEY"]}',
@@ -170,10 +186,13 @@ class Prompter:
             ]
         }
         response = requests.post(url, headers=headers, json=data)
+  
+        if id:
+            self.write_log(id, response)
         return response.json()['choices'][0]['message']['content']
 
 
-    def send_prompt(self, llm, temperature, system_prompt, prompt) -> str:
+    def send_prompt(self, id, llm, temperature, system_prompt, prompt) -> str:
         provider_name = ''
 
         for provider in self.provider_metadata:
@@ -194,29 +213,33 @@ class Prompter:
                 print(f"Temperature is not supported for model {llm}. Using default Temperature.")
 
         if self.provider_metadata[provider_name]["prompter"] == "openAI":
-            answer = self.prompt_openAI(provider_name, llm, temperature, system_prompt, prompt)
+            answer = self.prompt_openAI(id, provider_name, llm, temperature, system_prompt, prompt)
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "google":
             answer = None
             retry_limit = 5
-            while answer==None or retry_limit > 0:
-                answer = self.prompt_google(provider_name, llm, temperature, system_prompt, prompt)
+            while answer==None and retry_limit > 0:
+                if retry_limit != 5:
+                    print('Request failed, sleeping 5...')
+                    time.sleep(5)
+                answer = self.prompt_google(id, provider_name, llm, temperature, system_prompt, prompt)
                 retry_limit -= 1
+
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "anthropic":
-            answer = self.prompt_anthropic(provider_name, llm, temperature, system_prompt, prompt)
+            answer = self.prompt_anthropic(id, provider_name, llm, temperature, system_prompt, prompt)
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "huggingface":
-            answer = self.prompt_huggingface_endpoint(provider_name, llm, temperature, system_prompt, prompt)
+            answer = self.prompt_huggingface_endpoint(id, provider_name, llm, temperature, system_prompt, prompt)
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "mistral":
-            answer = self.prompt_mistral(provider_name, llm, temperature, system_prompt, prompt)
+            answer = self.prompt_mistral(id, provider_name, llm, temperature, system_prompt, prompt)
             return answer
 
         elif self.provider_metadata[provider_name]["prompter"] == "nebula":
-            answer = self.prompt_nebula(provider_name, llm, temperature, system_prompt, prompt)
+            answer = self.prompt_nebula(id, provider_name, llm, temperature, system_prompt, prompt)
             return answer
