@@ -28,7 +28,7 @@ class Prompter:
 
     def write_log(self, id, data):
         with open(f'{self.log_folder}/{str(id)}.log', 'w') as file:
-            file.write(data)
+            json.dump(data.json(), file, indent=4)
 
     def prompt_openAI(self, id, provider, llm, temperature, system_prompt, prompt) -> str:
         client = OpenAI(api_key=self.api_keys[f"{provider}_API_KEY"],

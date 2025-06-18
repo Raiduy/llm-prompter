@@ -173,8 +173,12 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+# Logs
+logs
+
 # Checkpoints Folder
 checkpoints
+logger_checkpoints
 
 # Results Folder
 results
